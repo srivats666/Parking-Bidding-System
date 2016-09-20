@@ -36,9 +36,12 @@ class Producer(threading.Thread):
 	producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
         while True:
-            #producer.send('parking_stream_topic', output)
             rd = random.randint(0, len(simplelist) -1)
-            print simplelist[rd].pID
+	    obj = simplelist[rd]
+	    occ = random.randint(0,1) == 1 ? 1 : -1
+  	    park_data = {"parking": {"pid": obj.pID,  "lat": obj.lat, "long": obj.long, "occ": occ}}
+            print obj.pID
+	    producer.send('parking_stream_topic', park_data)
             time.sleep(3)
 
 def main():
