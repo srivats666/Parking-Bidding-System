@@ -35,11 +35,11 @@ class Producer(threading.Thread):
 
         while True:
             rd = random.randint(0, len(simplelist) -1)
-            user_id = random.randint(0, 100)
-	    amt = random.randint(1, 43)
+            user_id = random.randint(0, 2000)
+	    amt = random.randint(1, 100)
 	    occ = random.randint(10, 400)
 	    obj = simplelist[rd]
-	    bid_data = {"bid": {"uid": user_id,  "pid": obj.pID, "amt": amt, "occ_now": occ}}
+	    bid_data = {"bid": {"uid": user_id,  "lat": obj.lat, "amt": amt, "long": obj.long}}
             producer.send('userbid_stream_topic', bid_data)
             print bid_data
             #time.sleep(3)

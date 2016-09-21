@@ -31,19 +31,19 @@ if __name__ == "__main__":
     park_data = KafkaUtils.createDirectStream(ssc, [topic], kafkaBrokers)
     bid_data = KafkaUtils.createDirectStream(ssc, [topic2], kafkaBrokers)
     
-    #park_data.pprint()    
+    park_data.pprint()    
     park_obj = raw_data_tojson(park_data)
     bid_obj = raw_data_tojson(bid_data)
-    s1 = bid_obj.map(lambda x: (x["pid"], (x["uid"], x["amt"], x["occ_now"])))   
-    s2 = park_obj.map(lambda x: (x["pid"], x["occ"]))
+    s1 = bid_obj.map(lambda x: (x["uid"], (x["amt"], x["lat"], x["long"])))   
+    s2 = park_obj.map(lambda x: (x["pid"], (x["occ"], x["lat"], x["long"])))
 
-    s1.pprint()
+    #s1.pprint()
     print "======== s1 ========"
-    s2.pprint()
+    #s2.pprint()
     print "========= s2 ========="
     #s2 = s2.filter(lambda x : x[1] > 0)
-    combined_info = s1.join(s2)
-    combined_info.pprint()
+    #combined_info = s1.join(s2)
+    #combined_info.pprint()
     #room_rate_gen = combined_info.map(lambda x: ((x[0][0]), x[0][1])).groupByKey().\
 	#mapValues(list)
     #room_rate_gen.pprint()

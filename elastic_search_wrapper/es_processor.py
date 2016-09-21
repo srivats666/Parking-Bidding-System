@@ -82,7 +82,7 @@ if __name__ == "__main__":
         "filtered": {
           "filter": {
             "geo_distance": {
-              "distance": "10000",
+              "distance": "2mi",
               "location": {
                 "lat":  37.797364,
                 "lon": -122.468291

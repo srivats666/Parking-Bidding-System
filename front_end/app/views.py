@@ -17,7 +17,7 @@ def get_lots(lat, long):
         "filtered": {
           "filter": {
             "geo_distance": {
-              "distance": "2500",
+              "distance": "0.3mi",
               "location": {
                 "lat":  lat,
                 "lon": long

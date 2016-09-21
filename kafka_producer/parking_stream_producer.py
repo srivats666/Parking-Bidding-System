@@ -40,7 +40,7 @@ class Producer(threading.Thread):
 	    obj = simplelist[rd]
 	    occ = 1 if random.randint(0,1) == 1 else -1
   	    park_data = {"parking": {"pid": obj.pID,  "lat": obj.lat, "long": obj.long, "occ": occ}}
-            print obj.pID
+            print park_data
 	    producer.send('parking_stream_topic', park_data)
             #time.sleep(1)
 
