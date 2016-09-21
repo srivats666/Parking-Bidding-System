@@ -26,9 +26,10 @@
 
       var beaches = [];
       var marker;
+      var map;
 
 function initMap() {
-  var map = new google.maps.Map(document.getElementById('map'), {
+  map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
     center: {lat: 37.797364, lng: -122.468291}
   });
@@ -40,18 +41,23 @@ function initMap() {
     position: {lat: 37.797364, lng: -122.468291}
   });
 
-  //map.infowindow = new google.maps.InfoWindow();
+   //map.infowindow = new google.maps.InfoWindow();
    
    //marker.addListener('click', toggleBounce);
-   //alert("in before");
-   $.ajax({
+   marker.addListener('dragend', handleEvent);
+   makeQuery();
+}
+
+function makeQuery()
+{
+     $.ajax({
         type: 'GET',
         url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/list/37.797364/-122.468291',
         data: { get_param: 'value' },
         success: function (data) {
 
             var json_obj = data["hits"]["hits"];
-            //alert(json_obj[0]._source.name)
+            alert(json_obj[0]._source.name)
             for (var i in json_obj)
             {
                //alert(json_obj[i].source)
@@ -64,17 +70,13 @@ function initMap() {
             setMarkers(map);
         }
     });
-   
 }
 
-     //var beaches = [
-     //   ['Bondi Beach', 37.76425207, -122.4207729, 4],
-       // ['Coogee Beach', 37.7832776731, -122.405537559, 5],
-    //    ['Cronulla Beach', 37.7849547433, -122.4328661663, 3],
-    //    ['Manly Beach', 37.7996475876, -122.4348921128, 2],
-    //    ['Maroubra Beach', 37.78452379, -122.3994795, 1]
-    //  ];
-     
+function handleEvent(event) {
+    var lat  = event.latLng.lat();
+    var lng = event.latLng.lng();
+    makeQuery();
+}
 
       function setMarkers(map) {
         // Adds markers to the map.
