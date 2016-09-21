@@ -38,11 +38,11 @@ class Producer(threading.Thread):
         while True:
             rd = random.randint(0, len(simplelist) -1)
 	    obj = simplelist[rd]
-	    occ = random.randint(0,1) == 1 ? 1 : -1
+	    occ = 1 if random.randint(0,1) == 1 else -1
   	    park_data = {"parking": {"pid": obj.pID,  "lat": obj.lat, "long": obj.long, "occ": occ}}
             print obj.pID
 	    producer.send('parking_stream_topic', park_data)
-            time.sleep(3)
+            #time.sleep(1)
 
 def main():
     make_data()
