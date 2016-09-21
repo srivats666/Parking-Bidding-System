@@ -25,24 +25,6 @@
     <script>
 
       var beaches = [];
-
-      $(document).ready(function () {
-    $.ajax({ 
-        type: 'GET', 
-        url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/list/22/33', 
-        data: { get_param: 'value' }, 
-        success: function (data) { 
-            var json_obj = data;
-	    	    
-            for (var i in json_obj) 
-            {
-               var arr1 = [json_obj[i].name, json_obj[i].lat, json_obj[i].long, 4];
-               beaches.push(arr1); 
-            }
-            
-        }
-    });
-});      
       var marker;
 
 function initMap() {
@@ -61,7 +43,28 @@ function initMap() {
   //map.infowindow = new google.maps.InfoWindow();
    
    //marker.addListener('click', toggleBounce);
-   setMarkers(map);
+   //alert("in before");
+   $.ajax({
+        type: 'GET',
+        url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/list/37.797364/-122.468291',
+        data: { get_param: 'value' },
+        success: function (data) {
+
+            var json_obj = data["hits"]["hits"];
+            //alert(json_obj[0]._source.name)
+            for (var i in json_obj)
+            {
+               //alert(json_obj[i].source)
+               var myLatlng = new google.maps.LatLng(parseFloat(json_obj[i]._source.location.lat), parseFloat(json_obj[i]._source.location.lon));
+
+               var arr1 = [json_obj[i]._source.name, myLatlng.lat(), myLatlng.lng(), json_obj[i]._source.occ];
+               beaches.push(arr1);
+            }
+            //alert("finsih");
+            setMarkers(map);
+        }
+    });
+   
 }
 
      //var beaches = [
@@ -111,7 +114,7 @@ function initMap() {
             zIndex: beach[3]
           });
           
-         var content = "<h3>Loan Number: " + beach[0] +  '</h3>' + "Address: " + beach[1];
+         var content = "<h3>" + beach[0] +  '</h3>' + "Avail: " + beach[3];
 	  
           marker['infowindow'] = new google.maps.InfoWindow({
             content: content

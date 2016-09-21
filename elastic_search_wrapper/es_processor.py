@@ -82,10 +82,10 @@ if __name__ == "__main__":
         "filtered": {
           "filter": {
             "geo_distance": {
-              "distance": "400",
+              "distance": "10000",
               "location": {
-                "lat":  40.715,
-                "lon": -73.988
+                "lat":  37.797364,
+                "lon": -122.468291
               }
             }
           }
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     #print ew.delete_index()
     #pprint(ew.get_mapping())
 
-    #pprint(get_all(es))
+    #print ew.get_all()
 
-#    print ew.delete_index()
-#    print ew.create_geo_index()
+#   print ew.delete_index()
+#   print ew.create_geo_index()
