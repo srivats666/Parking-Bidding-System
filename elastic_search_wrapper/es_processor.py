@@ -51,6 +51,23 @@ class ElasticProcessor():
         docs = map(add_meta_fields, docs)
         return eshelpers.bulk(self.es, docs)
 
+    def update_document_multi(self, docs):
+        """
+        Bulk indexes multiple documents.
+        docs is a list of document objects.
+        """
+        def add_meta_fields(doc):
+            return {
+                "_index": self.index,
+                "_type":  self.type,
+                "_id"  : doc["p_id"],
+                "doc": doc,
+		"_op_type": "update"
+            }
+
+        docs = map(add_meta_fields, docs)
+        return eshelpers.bulk(self.es, docs)
+
     def get_mapping(self):
         return self.es.indices.get_mapping(index=self.index, doc_type=self.type)
     
@@ -71,11 +88,12 @@ if __name__ == "__main__":
               "lon": -73.986 },
         "occ": "32",
         "oper": "42",
-        "name": "test",
+        "name": "SF parking space",
         "p_id": "126"
     }
 
-    doc1 = {'oper': 243, 'occ': 122, 'p_id': '76b1ab68a3a4408f8992d818888ec731', 'location': {'lat': '36.68569', 'lon': '-85.140677'}, 'name': 'Albany_42602'}
+    doc1 = {'oper' : 2, 'occ': 1, 'p_id': '76b1ab68a3a4408f8992d818888ec731', 'location': {'lat': '36.68569', 'lon': '-85.140677'}, 'name' : 'Anytime Parking'}
+    doc2 = {'p_id' : '76b1ab68a3a4408f8992d818888ec731', 'occ': 100}
     #print ew.create_document(doc1)
 
     dist_query = {
@@ -83,10 +101,10 @@ if __name__ == "__main__":
         "filtered": {
           "filter": {
             "geo_distance": {
-              "distance": "2mi",
+              "distance": "4mi",
               "location": {
-                "lat":  37.797364,
-                "lon": -122.468291
+                "lat":  36.68569,
+                "lon": -85.140677
               }
             }
           }
@@ -94,13 +112,14 @@ if __name__ == "__main__":
       }
     }
 
-    #create_document_multi(es, [doc0, doc1])
+    #print ew.update_document_multi([doc0, doc2])
+    #print ew.create_document_multi([doc0, doc2])
     #print ew.get_mapping()
     #print ew.search_document(dist_query)
     #print ew.delete_index()
     #pprint(ew.get_mapping())
 
-    print ew.get_all()
+    #print ew.get_all()
 
 #   print ew.delete_index()
 #   print ew.create_geo_index()
