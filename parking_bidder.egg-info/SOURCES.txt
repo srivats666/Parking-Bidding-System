@@ -7,3 +7,6 @@ parking_bidder.egg-info/dependency_links.txt
 parking_bidder.egg-info/top_level.txt
 scripts/__init__.py
 scripts/parking_generator.py
+scripts/parking_generator_usa.py
+stream_processing/__init__.py
+stream_processing/spark_streaming.py

@@ -21,8 +21,14 @@ def make_data():
 
         for lots in data["AVL"]:
 		y = Parking();
+
+                if 'OSPID' in lots:
+			id = lots["OSPID"]
+		elif 'BFID' in lots: 
+			id = lots["BFID"]
+
 		loclist = lots["LOC"].replace(' ','').split(',')
-		y.pID = lots["NAME"]
+		y.pID = id
 		y.lat = loclist[1]
 		y.long = loclist[0]
 		simplelist.append(y)
@@ -38,7 +44,7 @@ class Producer(threading.Thread):
         while True:
             rd = random.randint(0, len(simplelist) -1)
 	    obj = simplelist[rd]
-	    occ = 1 if random.randint(0,1) == 1 else -1
+	    occ = random.randint(10, 170)
   	    park_data = {"parking": {"pid": obj.pID,  "lat": obj.lat, "long": obj.long, "occ": occ}}
             print park_data
 	    producer.send('parking_stream_topic', park_data)

@@ -94,6 +94,7 @@ if __name__ == "__main__":
 
     doc1 = {'oper' : 2, 'occ': 1, 'p_id': '76b1ab68a3a4408f8992d818888ec731', 'location': {'lat': '36.68569', 'lon': '-85.140677'}, 'name' : 'Anytime Parking'}
     doc2 = {'p_id' : '76b1ab68a3a4408f8992d818888ec731', 'occ': 100}
+    doc3 = {'occ': 42, 'p_id': u'568191'}
     #print ew.create_document(doc1)
 
     dist_query = {
@@ -112,7 +113,7 @@ if __name__ == "__main__":
       }
     }
 
-    #print ew.update_document_multi([doc0, doc2])
+    print ew.update_document_multi([doc0, doc2, doc3])
     #print ew.create_document_multi([doc0, doc2])
     #print ew.get_mapping()
     #print ew.search_document(dist_query)

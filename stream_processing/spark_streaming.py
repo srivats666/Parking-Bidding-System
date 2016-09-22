@@ -3,6 +3,7 @@ from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from pyspark.sql import SQLContext, Row
+from elastic_search_wrapper.es_processor import ElasticProcessor
 import json
 
 def raw_data_tojson(sensor_data):
@@ -21,7 +22,7 @@ if __name__ == "__main__":
         #exit(-1)
 
     sc = SparkContext(appName="ParkingStreamingCompute")
-    ssc = StreamingContext(sc, 2)  # 1-sec window 
+    ssc = StreamingContext(sc, 4)  # 1-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
     zkQuorum = "localhost::2181"
@@ -31,11 +32,31 @@ if __name__ == "__main__":
     park_data = KafkaUtils.createDirectStream(ssc, [topic], kafkaBrokers)
     bid_data = KafkaUtils.createDirectStream(ssc, [topic2], kafkaBrokers)
     
-    park_data.pprint()    
+    #park_data.pprint()    
     park_obj = raw_data_tojson(park_data)
     bid_obj = raw_data_tojson(bid_data)
-    s1 = bid_obj.map(lambda x: (x["uid"], (x["amt"], x["lat"], x["long"])))   
-    s2 = park_obj.map(lambda x: (x["pid"], (x["occ"], x["lat"], x["long"])))
+    bidRdd = bid_obj.map(lambda x: (x["uid"], (x["amt"], x["lat"], x["long"])))   
+    parkRdd = park_obj.map(lambda x: {"p_id" : x["pid"], "occ" : x["occ"]})
+    
+    #parkRdd.pprint()
+
+    def process(rdd):
+        
+ 	ew = ElasticProcessor()
+	try:
+
+	   doc_list = []	
+           for kv in rdd:
+       		doc_list.append(kv)
+
+	   print ew.update_document_multi(doc_list)
+
+	except:
+	   pass
+
+    parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process))
+  
+    #parkList.pprint()
 
     #s1.pprint()
     print "======== s1 ========"
