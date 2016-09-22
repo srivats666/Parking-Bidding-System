@@ -10,7 +10,7 @@ def make_data():
 	occ = random.randint(10, 400)
 	oper = random.randint(occ, occ + 200)
 	id = uuid.uuid4().hex
-	name = line[2] + line[0]
+	name = line[2] + "_" + line[0]
         lat = line[3]
         lon = line[4]		
 	ew = ElasticProcessor()

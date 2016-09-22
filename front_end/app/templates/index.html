@@ -16,6 +16,19 @@
 	text-align: center;
 	margin: 0 auto;
       }
+
+      .button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+	}
       
     </style>
   </head>
@@ -167,8 +180,26 @@ function toggleBounce() {
     marker.setAnimation(google.maps.Animation.BOUNCE);
   }
 }
+
+function bid()
+{
+    var amt = 15;
+    $.ajax({
+        type: 'GET',
+        url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/bid/'+amt+'/'+lat+'/'+lng,
+        data: { get_param: 'value' },
+        success: function (data) {
+            alert("Bid successfully");
+        }
+    });
+     
+}
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOybKkudLiiEBTWmZmrqiQf5IYIR0Y9Xg&callback=initMap"
     async defer></script>
+    <div align="center">
+    <button type="button" onclick="bid()" class="button">Bid!</button>
+    </div>
   </body>
 </html>
