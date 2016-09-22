@@ -75,7 +75,8 @@ if __name__ == "__main__":
         "p_id": "126"
     }
 
-    #print ew.create_document(doc0)
+    doc1 = {'oper': 243, 'occ': 122, 'p_id': '76b1ab68a3a4408f8992d818888ec731', 'location': {'lat': '36.68569', 'lon': '-85.140677'}, 'name': 'Albany_42602'}
+    #print ew.create_document(doc1)
 
     dist_query = {
       "query": {
@@ -95,11 +96,11 @@ if __name__ == "__main__":
 
     #create_document_multi(es, [doc0, doc1])
     #print ew.get_mapping()
-    print ew.search_document(dist_query)
+    #print ew.search_document(dist_query)
     #print ew.delete_index()
     #pprint(ew.get_mapping())
 
-    #print ew.get_all()
+    print ew.get_all()
 
 #   print ew.delete_index()
 #   print ew.create_geo_index()

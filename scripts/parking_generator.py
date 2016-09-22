@@ -38,8 +38,8 @@ def make_data():
 				"p_id": id
 			}
 
-			print ew.create_document(doc0)
-                        #print doc0
+			#print ew.create_document(doc0)
+                        print doc0
 	
 if __name__ == "__main__":
     logging.basicConfig(
