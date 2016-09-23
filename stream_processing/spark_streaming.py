@@ -22,7 +22,7 @@ if __name__ == "__main__":
         #exit(-1)
 
     sc = SparkContext(appName="ParkingStreamingCompute")
-    ssc = StreamingContext(sc, 4)  # 1-sec window 
+    ssc = StreamingContext(sc, 10)  # 1-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
     zkQuorum = "localhost::2181"
@@ -32,14 +32,13 @@ if __name__ == "__main__":
     park_data = KafkaUtils.createDirectStream(ssc, [topic], kafkaBrokers)
     bid_data = KafkaUtils.createDirectStream(ssc, [topic2], kafkaBrokers)
     
-    #park_data.pprint()    
-    park_obj = raw_data_tojson(park_data)
-    bid_obj = raw_data_tojson(bid_data)
-    bidRdd = bid_obj.map(lambda x: (x["uid"], (x["amt"], x["lat"], x["long"])))   
-    parkRdd = park_obj.map(lambda x: {"p_id" : x["pid"], "occ" : x["occ"]})
+    parkRdd = raw_data_tojson(park_data)
+    bidRdd = raw_data_tojson(bid_data)
+    #bidRdd = bid_obj.map(lambda x: (x["uid"], (x["amt"], x["lat"], x["long"])))   
+    #parkRdd = park_obj.map(lambda x: {"p_id" : x["pid"], "occ" : x["occ"]})
     
-    #parkRdd.pprint()
-
+    #bidRdd.pprint()
+    #ew = ElasticProcessor()
     def process(rdd):
         
  	ew = ElasticProcessor()
@@ -48,20 +47,35 @@ if __name__ == "__main__":
 	   doc_list = []	
            for kv in rdd:
        		doc_list.append(kv)
+	   
+	   if(len(doc_list) > 0):
+	   	print ew.update_document_multi(doc_list)
 
-	   print ew.update_document_multi(doc_list)
-
-	except:
+	except Exception as e:
+	   print e
 	   pass
+    
+    
+    def process_bids(rdd):
+
+        ew = ElasticProcessor()
+        try:
+
+           usr_list = []
+           
+           for kv in rdd:
+		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
+
+	   if(len(usr_list) > 0):
+           	print ew.search_document_multi(usr_list)
+
+        except Exception as e:
+	   print e
+           pass
 
     parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process))
-  
-    #parkList.pprint()
+    bidRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_bids))    
 
-    #s1.pprint()
-    print "======== s1 ========"
-    #s2.pprint()
-    print "========= s2 ========="
     #s2 = s2.filter(lambda x : x[1] > 0)
     #combined_info = s1.join(s2)
     #combined_info.pprint()

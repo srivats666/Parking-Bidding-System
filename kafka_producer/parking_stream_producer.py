@@ -45,10 +45,10 @@ class Producer(threading.Thread):
             rd = random.randint(0, len(simplelist) -1)
 	    obj = simplelist[rd]
 	    occ = random.randint(10, 170)
-  	    park_data = {"parking": {"pid": obj.pID,  "lat": obj.lat, "long": obj.long, "occ": occ}}
+  	    park_data = {"parking": {"p_id": obj.pID, "occ": occ}}
             print park_data
 	    producer.send('parking_stream_topic', park_data)
-            #time.sleep(1)
+            time.sleep(3)
 
 def main():
     make_data()
