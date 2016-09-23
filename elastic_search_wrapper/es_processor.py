@@ -75,7 +75,7 @@ class ElasticProcessor():
         """
         def add_meta_fields(doc):
             #return "{}\n" + json.dumps(doc) + "\n"
-            return '{}\n{"query":{"filtered": {"filter": {"and" :{"filters" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "2mi", "location": {"lat": '+str(doc["lat"])+', "lon": '+str(doc["lon"])+'}}}]}}}}}\n'
+            return '{}\n{"query":{"filtered": {"filter": {"and" :{"filters" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "1mi", "location": {"lat": "'+str(doc["lat"])+'", "lon": "'+str(doc["lon"])+'"}}}]}}}}}\n'
 
         docs = map(add_meta_fields, docs)
         print docs
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     dist_query1 = {"lat":  61.68569, "lon": -149.140677}
     dist_query2 = {"lat":  42.68569,"lon": -110.140677}
-    dist_query3 = {"lat":  36.68569,"lon": -85.140677}
+    dist_query3 = {"lat":  37.78352702274404,"lon": -122.44734831201174}
 
     print ew.search_document_multi([dist_query3])
     #print ew.update_document_multi([doc0, doc2, doc3])

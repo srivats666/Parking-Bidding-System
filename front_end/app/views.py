@@ -45,9 +45,12 @@ def get_lots(lat, long):
    }
   }
   #print dist_query
+  usr_list = []
+  usr_list.append({"lat":  lat, "lon": long})
   ew = ElasticProcessor()
   try:
-     jsonresponse = ew.search_document(dist_query)
+     jsonresponse = ew.search_document_multi(usr_list)
+     #ew.search_document(dist_query)
      #print jsonresponse
   except Exception as e:
      print e

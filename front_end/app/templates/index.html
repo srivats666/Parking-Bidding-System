@@ -68,11 +68,11 @@ function makeQuery()
         url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/list/'+lat+'/'+lng,
         data: { get_param: 'value' },
         success: function (data) {
-            //alert(data["hits"]["hits"].length);
+            //alert(data["responses"][0]);
 	    beaches.length = 0;
-            if(data["hits"]["hits"].length > 0)
+            if(data["responses"][0]["hits"]["hits"].length > 0)
 	    {
-            var json_obj = data["hits"]["hits"];
+            var json_obj = data["responses"][0]["hits"]["hits"];
             //alert(json_obj[0]._source.name)
             for (var i in json_obj)
             {
