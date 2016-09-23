@@ -43,7 +43,7 @@ def bid(bid, lat, lon):
   bid_data = {"bid": {"uid": "Srivats",  "lat": lat, "amt": bid, "long": lon}}
   
   try:
-  	producer.send('my-topic', bid_data)
+  	producer.send('userbid_stream_topic', bid_data)
   except:
 	e = sys.exc_info()[0]
 	print e

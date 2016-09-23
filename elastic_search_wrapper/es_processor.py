@@ -75,10 +75,10 @@ class ElasticProcessor():
         """
         def add_meta_fields(doc):
             #return "{}\n" + json.dumps(doc) + "\n"
-            return '{}\n{"query": {"filtered": {"filter": {"geo_distance": {"distance": "2mi", "location": {"lat": '+str(doc["lat"])+', "lon": '+str(doc["lon"])+'}}}}}}\n'
+            return '{}\n{"query":{"filtered": {"filter": {"bool" :{"should" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "2mi", "location": {"lat": '+str(doc["lat"])+', "lon": '+str(doc["lon"])+'}}}]}}}}}\n'
 
         docs = map(add_meta_fields, docs)
-        #print docs
+        print docs
         return self.es.msearch(index=self.index, search_type="query_and_fetch", body=docs)
 
 
