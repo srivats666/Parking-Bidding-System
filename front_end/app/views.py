@@ -17,23 +17,39 @@ def index():
 def get_lots(lat, long):
   
   dist_query = {
-      "query": {
-        "filtered": {
-          "filter": {
-            "geo_distance": {
-              "distance": "2mi",
-              "location": {
-                "lat":  lat,
-                "lon": long
-              }
+   "query":{
+      "filtered":{
+         "filter":{
+            "and":{
+               "filters":[
+                  {
+                     "range":{
+                        "occ":{
+                           "gte":0
+                        }
+                     }
+                  },
+                  {
+                     "geo_distance":{
+                        "distance":"2mi",
+                        "location":{
+                           "lat": lat,
+                           "lon": long
+                        }
+                     }
+                  }
+               ]
             }
-          }
-        }
+         }
       }
    }
-
+  }
+  #print dist_query
   ew = ElasticProcessor()
-  jsonresponse = ew.search_document(dist_query)
+  try:
+     jsonresponse = ew.search_document(dist_query)
+  except Exception as e:
+     print e
   #jsonresponse = [{"name": "Garage1", "lat": 37.76425207, "long": -122.4207729, "occ": "122", "oper": "200"}, {"name": "Garage2", "lat": 37.7832776731, "long": -122.405537559, "occ": "35", "oper": "130"}]
   return jsonify(jsonresponse)
 
