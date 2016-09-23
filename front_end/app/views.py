@@ -5,6 +5,8 @@ from elastic_search_wrapper.es_processor import ElasticProcessor
 import json
 from kafka import KafkaProducer
 
+producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -37,10 +39,9 @@ def get_lots(lat, long):
 
 @app.route('/api/bid/<bid>/<lat>/<lon>')
 def bid(bid, lat, lon):
-  
-  producer = KafkaProducer(bootstrap_servers='ec2-52-43-77-237.us-west-2.compute.amazonaws.com:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-  bid_data = {"bid": {"uid": "Srivats",  "lat": lat, "amt": bid, "long": lon}}
 
+  bid_data = {"bid": {"uid": "Srivats",  "lat": lat, "amt": bid, "long": lon}}
+  
   try:
   	producer.send('my-topic', bid_data)
   except:
