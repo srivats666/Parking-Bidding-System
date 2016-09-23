@@ -68,7 +68,8 @@ function makeQuery()
         url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/list/'+lat+'/'+lng,
         data: { get_param: 'value' },
         success: function (data) {
-            //alert(data);
+            //alert(data["hits"]["hits"].length);
+	    beaches.length = 0;
             if(data["hits"]["hits"].length > 0)
 	    {
             var json_obj = data["hits"]["hits"];
@@ -100,13 +101,15 @@ function handleEvent(event) {
 
       function deleteMarkers() {
         clearMarkers();
-        markers = [];
+        markers.length = 0;
       }
       
       //Sets the map on all markers in the array.
       function setMapOnAll(map) {
+	
         for (var i = 0; i < markers.length; i++) {
-          markers[i].setMap(map);
+        	//alert(markers[i]);  
+		markers[i].setMap(map);
         }
       }
  

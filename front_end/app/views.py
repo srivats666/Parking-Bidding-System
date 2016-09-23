@@ -48,6 +48,7 @@ def get_lots(lat, long):
   ew = ElasticProcessor()
   try:
      jsonresponse = ew.search_document(dist_query)
+     #print jsonresponse
   except Exception as e:
      print e
   #jsonresponse = [{"name": "Garage1", "lat": 37.76425207, "long": -122.4207729, "occ": "122", "oper": "200"}, {"name": "Garage2", "lat": 37.7832776731, "long": -122.405537559, "occ": "35", "oper": "130"}]
