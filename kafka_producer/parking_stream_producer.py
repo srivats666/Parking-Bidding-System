@@ -47,7 +47,7 @@ class Producer(threading.Thread):
 	    occ = random.randint(10, 170)
   	    park_data = {"parking": {"p_id": obj.pID, "occ": occ}}
             print park_data
-	    producer.send('my-topic', park_data)
+	    producer.send('parking_stream_topic', park_data)
             time.sleep(3)
 
 def main():
