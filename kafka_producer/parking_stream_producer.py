@@ -48,7 +48,7 @@ class Producer(threading.Thread):
   	    park_data = {"parking": {"p_id": obj.pID, "occ": occ}}
             print park_data
 	    producer.send('parking_stream_topic', park_data)
-            time.sleep(3)
+            time.sleep(1)
 
 def main():
     make_data()

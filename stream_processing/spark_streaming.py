@@ -5,6 +5,7 @@ from pyspark.streaming.kafka import KafkaUtils
 from pyspark.sql import SQLContext, Row
 from elastic_search_wrapper.es_processor import ElasticProcessor
 import json
+from kafka import KafkaProducer
 
 def raw_data_tojson(sensor_data):
   """ Parse input json stream """
@@ -65,6 +66,10 @@ if __name__ == "__main__":
            
            for kv in rdd:
 		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
+
+	   #producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dum$
+	   #bid_res = {"uid": kv["uid"], "p_id": obj.pID}
+           #producer.send('my-_topic', bid_res)
 
 	   if(len(usr_list) > 0):
            	print ew.search_document_multi(usr_list)
