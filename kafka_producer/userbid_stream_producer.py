@@ -42,7 +42,7 @@ class Producer(threading.Thread):
 	    bid_data = {"bid": {"uid": user_id,  "lat": obj.lat, "amt": amt, "long": obj.long}}
             producer.send('userbid_stream_topic', bid_data)
             print bid_data
-            time.sleep(3)
+            time.sleep(2)
 
 def main():
     make_data()

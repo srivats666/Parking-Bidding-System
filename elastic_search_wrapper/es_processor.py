@@ -78,7 +78,7 @@ class ElasticProcessor():
             return '{}\n{"query":{"filtered": {"filter": {"and" :{"filters" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "1mi", "location": {"lat": "'+str(doc["lat"])+'", "lon": "'+str(doc["lon"])+'"}}}]}}}}}\n'
 
         docs = map(add_meta_fields, docs)
-        print docs
+        #print docs
         return self.es.msearch(index=self.index, search_type="query_and_fetch", body=docs)
 
 

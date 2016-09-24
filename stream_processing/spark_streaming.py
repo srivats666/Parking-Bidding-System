@@ -10,9 +10,7 @@ from kafka import KafkaProducer
 def raw_data_tojson(sensor_data):
   """ Parse input json stream """
   raw_sensor = sensor_data.map(lambda k: json.loads(k[1]))
-  #raw_sensor.pprint()
   t = raw_sensor.map(lambda x: x[x.keys()[0]])
-  #t.pprint()
   return t
  
 
@@ -23,7 +21,7 @@ if __name__ == "__main__":
         #exit(-1)
 
     sc = SparkContext(appName="ParkingStreamingCompute")
-    ssc = StreamingContext(sc, 10)  # 1-sec window 
+    ssc = StreamingContext(sc, 20)  # 10-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
     zkQuorum = "localhost::2181"
@@ -33,14 +31,16 @@ if __name__ == "__main__":
     park_data = KafkaUtils.createDirectStream(ssc, [topic], kafkaBrokers)
     bid_data = KafkaUtils.createDirectStream(ssc, [topic2], kafkaBrokers)
     
+    print "==== Start ===="
+
     parkRdd = raw_data_tojson(park_data)
     bidRdd = raw_data_tojson(bid_data)
-    #bidRdd = bid_obj.map(lambda x: (x["uid"], (x["amt"], x["lat"], x["long"])))   
+    bid_list = bidRdd.map(lambda x: (x["uid"], x["amt"]))
+    bid_list.transform(lambda x: x.sortBy(lambda y: y[1], false))
+    #bid_list.pprint()
     #parkRdd = park_obj.map(lambda x: {"p_id" : x["pid"], "occ" : x["occ"]})
     
-    #bidRdd.pprint()
-    #ew = ElasticProcessor()
-    def process(rdd):
+    def process_lots(rdd):
         
  	ew = ElasticProcessor()
 	try:
@@ -55,43 +55,67 @@ if __name__ == "__main__":
 	except Exception as e:
 	   print e
 	   pass
-    
-    
+      
     def process_bids(rdd):
-
+	
         ew = ElasticProcessor()
         try:
 
            usr_list = []
-           
+	   user_id = []           
            for kv in rdd:
+		user_id.append(kv["uid"])
 		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
 
 	   #producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dum$
 	   #bid_res = {"uid": kv["uid"], "p_id": obj.pID}
            #producer.send('my-_topic', bid_res)
+	   results = []
 
 	   if(len(usr_list) > 0):
-           	print ew.search_document_multi(usr_list)
+	        res = ew.search_document_multi(usr_list)
 
-        except Exception as e:
+		i = 0
+		responses = res['responses']
+
+        	for response in responses:
+            		try:
+                		hits = response['hits']['hits']
+				park_list = []
+				
+                		if len(hits) != 0:
+				    for h in hits:
+					park_lot = h['_source']
+					p_id = park_lot['p_id']
+					occ = park_lot['occ']
+					name = park_lot['name']
+					park_list.append((user_id[i], (p_id, occ, name)))
+				else:
+                    			park_list.append("")
+
+				results.append(park_list)
+				i += 1	
+
+            		except KeyError:
+                		raise Exception(response)
+    
+	   return results
+	
+	except Exception as e:
 	   print e
+	   raise Exception(results)
            pass
 
-    parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process))
-    bidRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_bids))    
+    parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_lots))
+    lots_dict = bidRdd.mapPartitions(process_bids)
+    lots_dict.pprint()
 
     #s2 = s2.filter(lambda x : x[1] > 0)
     #combined_info = s1.join(s2)
     #combined_info.pprint()
     #room_rate_gen = combined_info.map(lambda x: ((x[0][0]), x[0][1])).groupByKey().\
 	#mapValues(list)
-    #room_rate_gen.pprint()
-    #s1.pprint()
-    #gp.pprint()
 
-    print "==== Start ===="
-    #counts.pprint()
     print "=== End ===="
     ssc.start()
     ssc.awaitTermination()
