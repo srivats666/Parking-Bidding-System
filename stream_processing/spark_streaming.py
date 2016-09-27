@@ -36,8 +36,8 @@ if __name__ == "__main__":
     parkRdd = raw_data_tojson(park_data)
     bidRdd = raw_data_tojson(bid_data)
     bid_list = bidRdd.map(lambda x: (x["uid"], x["amt"]))
-    bid_list.transform(lambda x: x.sortBy(lambda y: y[1], false))
-    #bid_list.pprint()
+    sorted_bid = bid_list.transform(lambda x: x.sortBy(lambda y: -y[1]))
+    sorted_bid.pprint()
     #parkRdd = park_obj.map(lambda x: {"p_id" : x["pid"], "occ" : x["occ"]})
     
     def process_lots(rdd):
@@ -75,9 +75,10 @@ if __name__ == "__main__":
 	   if(len(usr_list) > 0):
 	        res = ew.search_document_multi(usr_list)
 
+		#print res
 		i = 0
 		responses = res['responses']
-
+		#print len(responses)
         	for response in responses:
             		try:
                 		hits = response['hits']['hits']
@@ -89,21 +90,18 @@ if __name__ == "__main__":
 					p_id = park_lot['p_id']
 					occ = park_lot['occ']
 					name = park_lot['name']
-					park_list.append((user_id[i], (p_id, occ, name)))
-				else:
-                    			park_list.append("")
+					park_list.append((user_id[i] , (p_id, occ, name)))
 
 				results.append(park_list)
 				i += 1	
 
             		except KeyError:
-                		raise Exception(response)
+                		print Exception(response)
     
 	   return results
 	
 	except Exception as e:
-	   print e
-	   raise Exception(results)
+	   raise Exception(e)
            pass
 
     parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_lots))

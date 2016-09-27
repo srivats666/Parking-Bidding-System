@@ -5,6 +5,7 @@ class ElasticProcessor():
     def __init__(self, index="parkingdata", type="point"):
         self.index = index
         self.type = type
+	self.filter_path=['hits.hits.*']
         self.es = Elasticsearch(
             [{'host':'localhost'}] 
         )
@@ -73,13 +74,21 @@ class ElasticProcessor():
         Bulk indexes multiple documents.
         docs is a list of document objects.
         """
-        def add_meta_fields(doc):
+        #def add_meta_fields(doc):
             #return "{}\n" + json.dumps(doc) + "\n"
-            return '{}\n{"query":{"filtered": {"filter": {"and" :{"filters" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "1mi", "location": {"lat": "'+str(doc["lat"])+'", "lon": "'+str(doc["lon"])+'"}}}]}}}}}\n'
+            #'{"query":{"filtered": {"filter": {"and" :{"filters" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "1mi", "location": {"lat": "'+str(doc["lat"])+'", "lon": "'+str(doc["lon"])+'"}}}]}}}}}'
 
-        docs = map(add_meta_fields, docs)
-        #print docs
-        return self.es.msearch(index=self.index, search_type="query_and_fetch", body=docs)
+        #docs = map(add_meta_fields, docs)
+	
+	body_elems = []
+	for doc in docs:
+	    body_elems.append('{}')
+	    body_elems.append('{"query":{"filtered": {"filter": {"and" :{"filters" : [{"range" : { "occ" : {"gte": 0} }}, {"geo_distance": {"distance": "1mi", "location": {"lat": "'+str(doc["lat"])+'", "lon": "'+str(doc["lon"])+'"}}}]}}}}}')
+			
+	body = '\n'.join(body_elems)
+        res = self.es.msearch(index=self.index, doc_type=self.type, body=body)
+	#print len(res['responses'])
+	return res
 
 
     def get_mapping(self):
@@ -126,12 +135,17 @@ if __name__ == "__main__":
         }
       }
     }
-
+    
+    dist_query4 = {"lat": 37.7900040233, "lon": -122.3907533695}
+    dist_query5 = {"lat": 37.7781271374, "lon": -122.4201850734}
+    dist_query6 = {"lat": 37.7849547433, "lon": -122.4328661663}
+    dist_query7 = {"lat": 37.7804646952, "lon": -122.3905582378}
+    
     dist_query1 = {"lat":  61.68569, "lon": -149.140677}
     dist_query2 = {"lat":  42.68569,"lon": -110.140677}
-    dist_query3 = {"lat":  37.78352702274404,"lon": -122.44734831201174}
+    dist_query3 = {"lat":  37.78352702274404, "lon": -122.44734831201174}
 
-    print ew.search_document_multi([dist_query3])
+    print ew.search_document_multi([dist_query1, dist_query2, dist_query3])
     #print ew.update_document_multi([doc0, doc2, doc3])
     #print ew.create_document_multi([doc0, doc2])
     #print ew.get_mapping()
