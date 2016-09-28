@@ -1,4 +1,5 @@
 import sys
+import time
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
@@ -6,6 +7,9 @@ from pyspark.sql import SQLContext, Row
 from elastic_search_wrapper.es_processor import ElasticProcessor
 import json
 from kafka import KafkaProducer
+from collections import defaultdict
+import datetime
+import redis
 
 def raw_data_tojson(sensor_data):
   """ Parse input json stream """
@@ -35,14 +39,14 @@ if __name__ == "__main__":
 
     parkRdd = raw_data_tojson(park_data)
     bidRdd = raw_data_tojson(bid_data)
-    bid_list = bidRdd.map(lambda x: (x["uid"], x["amt"]))
-    sorted_bid = bid_list.transform(lambda x: x.sortBy(lambda y: -y[1]))
-    sorted_bid.pprint()
-    #parkRdd = park_obj.map(lambda x: {"p_id" : x["pid"], "occ" : x["occ"]})
+    #bid_list = bidRdd.map(lambda x: (x["uid"], x["amt"]))
+    #sorted_bid = bid_list.transform(lambda x: x.sortBy(lambda y: -y[1]))
     
     def process_lots(rdd):
-        
+
+	print "inside elastic search updates"        
  	ew = ElasticProcessor()
+
 	try:
 
 	   doc_list = []	
@@ -58,31 +62,27 @@ if __name__ == "__main__":
       
     def process_bids(rdd):
 	
+	print "inside process bids"
+	results = defaultdict(list)
+	
         ew = ElasticProcessor()
         try:
 
            usr_list = []
-	   user_id = []           
+	   user_id = []
+           
            for kv in rdd:
-		user_id.append(kv["uid"])
+		user_id.append((kv["uid"], kv["amt"]))
 		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
-
-	   #producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dum$
-	   #bid_res = {"uid": kv["uid"], "p_id": obj.pID}
-           #producer.send('my-_topic', bid_res)
-	   results = []
 
 	   if(len(usr_list) > 0):
 	        res = ew.search_document_multi(usr_list)
-
-		#print res
 		i = 0
 		responses = res['responses']
-		#print len(responses)
+
         	for response in responses:
             		try:
                 		hits = response['hits']['hits']
-				park_list = []
 				
                 		if len(hits) != 0:
 				    for h in hits:
@@ -90,30 +90,38 @@ if __name__ == "__main__":
 					p_id = park_lot['p_id']
 					occ = park_lot['occ']
 					name = park_lot['name']
-					park_list.append((user_id[i] , (p_id, occ, name)))
-
-				results.append(park_list)
+					results[(p_id, occ)].append(user_id[i])
+				
 				i += 1	
 
             		except KeyError:
                 		print Exception(response)
-    
-	   return results
+           
+	   return results.items()
 	
 	except Exception as e:
-	   raise Exception(e)
+	   print Exception(e)
            pass
 
+    def assign_lots(rdd):
+	 print "inside assign lots"
+	 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+         
+	 # assign users with parking spots
+	 for k,v in rdd:
+	     print k, v
+	    
+  	     
     parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_lots))
-    lots_dict = bidRdd.mapPartitions(process_bids)
-    lots_dict.pprint()
-
-    #s2 = s2.filter(lambda x : x[1] > 0)
-    #combined_info = s1.join(s2)
-    #combined_info.pprint()
-    #room_rate_gen = combined_info.map(lambda x: ((x[0][0]), x[0][1])).groupByKey().\
-	#mapValues(list)
+    lots_map = bidRdd.mapPartitions(process_bids)
+    lots_map.foreachRDD(lambda rdd: rdd.foreachPartition(assign_lots))
+ 
+    #sorted_usrs = lots_map.transform(lambda x: x.items().sortBy(lambda y: -y[1]))  
+    #sorted_usrs.pprint()
+    
+    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+    redis_client.flushdb()
 
     print "=== End ===="
-    ssc.start()
+    ssc.start() 
     ssc.awaitTermination()
