@@ -62,7 +62,7 @@ def get_lots(lat, long):
 @app.route('/api/bid/<bid>/<lat>/<lon>')
 def bid(bid, lat, lon):
 
-  bid_data = {"bid": {"uid": "Srivats",  "lat": lat, "amt": bid, "long": lon}}
+  bid_data = {"bid": {"uid": "Srivats",  "lat": lat, "amt": int(bid), "long": lon}}
   
   try:
   	producer.send('userbid_stream_topic', bid_data)

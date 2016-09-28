@@ -39,6 +39,13 @@ if __name__ == "__main__":
 
     parkRdd = raw_data_tojson(park_data)
     bidRdd = raw_data_tojson(bid_data)
+	
+    # flushing redis before every window	
+    def flush_redis(rdd):
+	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+    	redis_client.flushdb()    
+    
+    bidRdd.foreachRDD(lambda x: x.foreachPartition(flush_redis))
         
     # bulk updating the occ of all lots coming through the parking stream for a 30 sec window
     def process_lots(rdd):
@@ -92,7 +99,9 @@ if __name__ == "__main__":
 					p_id = park_lot['p_id']
 					occ = park_lot['occ']
 					name = park_lot['name']
-					results[(p_id, occ)].append(user_id[i])
+					lat = park_lot['location']['lat']
+					lon = park_lot['location']['lon']
+					results[(p_id, occ, lat, lon)].append(user_id[i])
 				
 				i += 1	
 
@@ -102,7 +111,7 @@ if __name__ == "__main__":
 	   # sorting the users by bid amount for each parking lot
 	   for k,v in results.items():
 		v.sort(key=lambda x: -x[1])
-           
+	    
 	   return results.items()
 	
 	except Exception as e:
@@ -114,7 +123,6 @@ if __name__ == "__main__":
 	 print "inside assign lots"
 	 
 	 try:
-
 	 	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
          
 	 	# assign users with parking spots
@@ -130,7 +138,13 @@ if __name__ == "__main__":
 				redis_client.set(id, k[0])
 				occ -= 1			
 
-	 except exception as e:
+		
+		keys = redis_client.keys('*')
+		for key in keys:
+        	    val = redis_client.get(key)
+		    print key, val
+
+	 except Exception as e:
 	   print Exception(e)
 	   pass
          
@@ -138,9 +152,6 @@ if __name__ == "__main__":
     parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_lots))
     lots_map = bidRdd.mapPartitions(process_bids)
     lots_map.foreachRDD(lambda rdd: rdd.foreachPartition(assign_lots))
-    
-    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
-    redis_client.flushdb()
 
     print "=== End ===="
     ssc.start() 

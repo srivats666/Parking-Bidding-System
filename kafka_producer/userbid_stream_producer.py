@@ -35,7 +35,7 @@ class Producer(threading.Thread):
 
         while True:
             rd = random.randint(0, len(simplelist) -1)
-            user_id = random.randint(0, 2000)
+            user_id = random.randint(1, 200000)
 	    amt = random.randint(1, 100)
 	    occ = random.randint(10, 400)
 	    obj = simplelist[rd]
