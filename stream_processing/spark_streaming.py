@@ -124,6 +124,8 @@ if __name__ == "__main__":
 	 
 	 try:
 	 	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+		ew = ElasticProcessor()
+ 	        doc_list = []
          
 	 	# assign users with parking spots
 	 	for k,v in rdd:
@@ -136,9 +138,13 @@ if __name__ == "__main__":
 			
 			if redis_client.get(id) == "none":
 				redis_client.set(id, k[0])
-				occ -= 1			
-
+				occ -= 1
+				
+		     doc_list.append({"p_id": k[0], "occ": occ})
 		
+		if(len(doc_list) > 0):
+                	print ew.update_document_multi(doc_list)
+			
 		keys = redis_client.keys('*')
 		for key in keys:
         	    val = redis_client.get(key)
