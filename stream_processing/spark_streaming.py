@@ -39,16 +39,15 @@ if __name__ == "__main__":
 
     parkRdd = raw_data_tojson(park_data)
     bidRdd = raw_data_tojson(bid_data)
-    #bid_list = bidRdd.map(lambda x: (x["uid"], x["amt"]))
-    #sorted_bid = bid_list.transform(lambda x: x.sortBy(lambda y: -y[1]))
-    
+        
+    # bulk updating the occ of all lots coming through the parking stream for a 30 sec window
     def process_lots(rdd):
 
-	print "inside elastic search updates"        
- 	ew = ElasticProcessor()
+	print "inside elastic search updates"
 
 	try:
 
+	   ew = ElasticProcessor()
 	   doc_list = []	
            for kv in rdd:
        		doc_list.append(kv)
@@ -60,20 +59,23 @@ if __name__ == "__main__":
 	   print e
 	   pass
       
+    # bulk msearch through elastic to find closest lots with availability > 0 and within a mile radius of the users lat and long within the 30 sec window
     def process_bids(rdd):
 	
 	print "inside process bids"
 	results = defaultdict(list)
 	
-        ew = ElasticProcessor()
         try:
 
+	   redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+	   ew = ElasticProcessor()
            usr_list = []
 	   user_id = []
            
            for kv in rdd:
 		user_id.append((kv["uid"], kv["amt"]))
 		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
+		redis_client.set(kv["uid"], "none")
 
 	   if(len(usr_list) > 0):
 	        res = ew.search_document_multi(usr_list)
@@ -96,6 +98,10 @@ if __name__ == "__main__":
 
             		except KeyError:
                 		print Exception(response)
+	   
+	   # sorting the users by bid amount for each parking lot
+	   for k,v in results.items():
+		v.sort(key=lambda x: -x[1])
            
 	   return results.items()
 	
@@ -103,21 +109,35 @@ if __name__ == "__main__":
 	   print Exception(e)
            pass
 
+    # assigning users to lots only if the lot has occ and redis does not have any lot assigned to it.
     def assign_lots(rdd):
 	 print "inside assign lots"
-	 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+	 
+	 try:
+
+	 	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
          
-	 # assign users with parking spots
-	 for k,v in rdd:
-	     print k, v
-	    
+	 	# assign users with parking spots
+	 	for k,v in rdd:
+	     	     occ = k[1]
+		     for users in v:
+			
+			id = users[0]
+			if occ == 0:
+			    break
+			
+			if redis_client.get(id) == "none":
+				redis_client.set(id, k[0])
+				occ -= 1			
+
+	 except exception as e:
+	   print Exception(e)
+	   pass
+         
   	     
     parkRdd.foreachRDD(lambda rdd: rdd.foreachPartition(process_lots))
     lots_map = bidRdd.mapPartitions(process_bids)
     lots_map.foreachRDD(lambda rdd: rdd.foreachPartition(assign_lots))
- 
-    #sorted_usrs = lots_map.transform(lambda x: x.items().sortBy(lambda y: -y[1]))  
-    #sorted_usrs.pprint()
     
     redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
     redis_client.flushdb()
