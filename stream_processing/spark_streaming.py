@@ -101,7 +101,7 @@ if __name__ == "__main__":
 					name = park_lot['name']
 					lat = park_lot['location']['lat']
 					lon = park_lot['location']['lon']
-					results[(p_id, occ, lat, lon)].append(user_id[i])
+					results[(p_id, occ, lat, lon, name)].append(user_id[i])
 				
 				i += 1	
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
 			if redis_client.get(id) == "none":
 				redis_client.set(id, k[0])
 				occ -= 1
-				res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[0]) + '"}'
+				res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[4]) + '"}'
 		                redis_client.publish("bid_results", res)
 				
 		     doc_list.append({"p_id": k[0], "occ": occ})

@@ -22,7 +22,7 @@ def callback():
 	    
 	    try:
                 val = json.loads(item["data"])
-                #print val
+                print val
 		external_storage[val["user_id"]].write_message(val["p_id"])
 	    
 	    except Exception as e:
@@ -39,7 +39,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         self.id = uuid.uuid4()
         print 'new connection'
-        self.write_message("Hello World")
+        self.write_message("hello")
 								
     def on_message(self, message):
         #Some message parsing here

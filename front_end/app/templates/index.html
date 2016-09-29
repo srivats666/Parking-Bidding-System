@@ -54,7 +54,11 @@ input[type=text]{
         //alert("inside"); 
         ws.onmessage  = function(e) {
            console.log(e.data);
-	   sendMsg();
+           if(e.data == "hello")
+	   	sendMsg();
+	   else
+		alert("You have been assigned a spot at " + e.data);
+
         };
     }
  
