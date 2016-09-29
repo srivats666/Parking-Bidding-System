@@ -7,7 +7,7 @@ class ElasticProcessor():
         self.type = type
 	self.filter_path=['hits.hits.*']
         self.es = Elasticsearch(
-            [{'host':'localhost'}] 
+            [{'host':'172.31.1.204'}] 
         )
 
     def delete_index(self):

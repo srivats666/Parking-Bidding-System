@@ -12,7 +12,7 @@ global external_storage
 external_storage = {}
 
 def callback():
-    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, password='srivats')
     global redis_pub
     redis_pub = redis_client.pubsub()
     redis_pub.subscribe("bid_results")

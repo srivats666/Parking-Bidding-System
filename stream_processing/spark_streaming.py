@@ -25,7 +25,7 @@ if __name__ == "__main__":
         #exit(-1)
 
     sc = SparkContext(appName="ParkingStreamingCompute")
-    ssc = StreamingContext(sc, 30)  # 30-sec window 
+    ssc = StreamingContext(sc, 10)  # 30-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
     zkQuorum = "localhost::2181"
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 	
     # flushing redis before every window	
     def flush_redis(rdd):
-	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+	redis_client = redis.StrictRedis(host='172.31.1.204', port=6379, db=0, password='srivats')
     	redis_client.flushdb()    
     
     bidRdd.foreachRDD(lambda x: x.foreachPartition(flush_redis))
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 	
         try:
 
-	   redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+	   redis_client = redis.StrictRedis(host='172.31.1.204', port=6379, db=0, password='srivats')
 	   ew = ElasticProcessor()
            usr_list = []
 	   user_id = []
@@ -82,7 +82,7 @@ if __name__ == "__main__":
            for kv in rdd:
 		user_id.append((kv["uid"], kv["amt"]))
 		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
-		redis_client.set(kv["uid"], "none")
+		#redis_client.set(kv["uid"], "none")
 
 	   if(len(usr_list) > 0):
 	        res = ew.search_document_multi(usr_list)
@@ -109,8 +109,8 @@ if __name__ == "__main__":
                 		print Exception(response)
 	   
 	   # sorting the users by bid amount for each parking lot
-	   for k,v in results.items():
-		v.sort(key=lambda x: -x[1])
+	   #for k,v in results.items():
+		#v.sort(key=lambda x: -x[1])
 	    
 	   return results.items()
 	
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 	 print "inside assign lots"
 	 
 	 try:
-	 	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+	 	redis_client = redis.StrictRedis(host='172.31.1.204', port=6379, db=0, password='srivats')
 		#redis_pub = redis_client.pubsub()
 		ew = ElasticProcessor()
  	        doc_list = []
@@ -137,21 +137,21 @@ if __name__ == "__main__":
 			if occ == 0:
 			    break
 			
-			if redis_client.get(id) == "none":
+			if redis_client.get(id) is None:
 				redis_client.set(id, k[0])
 				occ -= 1
-				res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[4]) + '"}'
-		                redis_client.publish("bid_results", res)
+				#res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[4]) + '"}'
+		                #redis_client.publish("bid_results", res)
 				
 		     doc_list.append({"p_id": k[0], "occ": occ})
 		
 		if(len(doc_list) > 0):
                 	print ew.update_document_multi(doc_list)
 			
-		keys = redis_client.keys('*')
-		for key in keys:
-        	    val = redis_client.get(key)
-		    print key, val
+		#keys = redis_client.keys('*')
+		#for key in keys:
+        	    #val = redis_client.get(key)
+		    #print key, val
 
 	 except Exception as e:
 	   print Exception(e)

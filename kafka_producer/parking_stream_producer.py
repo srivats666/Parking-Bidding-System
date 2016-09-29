@@ -40,7 +40,7 @@ class Producer(threading.Thread):
 
     def run(self):
 	producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-
+	count = 0
         while True:
             rd = random.randint(0, len(simplelist) -1)
 	    obj = simplelist[rd]
@@ -48,7 +48,11 @@ class Producer(threading.Thread):
   	    park_data = {"parking": {"p_id": obj.pID, "occ": occ}}
             print park_data
 	    producer.send('parking_stream_topic', park_data)
-            time.sleep(1)
+	    count + =1
+
+	    if count == 500:
+            	time.sleep(1)
+		count = 0
 
 def main():
     make_data()

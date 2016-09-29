@@ -32,7 +32,7 @@ class Producer(threading.Thread):
 
     def run(self):
 	producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-
+	count = 0
         while True:
             rd = random.randint(0, len(simplelist) -1)
             user_id = random.randint(1, 200000)
@@ -42,7 +42,11 @@ class Producer(threading.Thread):
 	    bid_data = {"bid": {"uid": user_id,  "lat": obj.lat, "amt": amt, "long": obj.long}}
             producer.send('userbid_stream_topic', bid_data)
             print bid_data
-            time.sleep(2)
+   	    count += 1
+
+	    if count == 500:
+            	time.sleep(1)
+		count = 0
 
 def main():
     make_data()
