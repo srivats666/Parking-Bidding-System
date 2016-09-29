@@ -51,15 +51,15 @@ input[type=text]{
  
     function onLoad() {
         ws = new WebSocket("ws://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/websocket");
- 
-        ws.onmessage = function(e) {
+        //alert("inside"); 
+        ws.onmessage  = function(e) {
            console.log(e.data);
 	   sendMsg();
         };
     }
  
     function sendMsg() {
-        ws.send('{"user_id" : user, "type" : "set_user_id"}');
+        ws.send('{"user_id" : "' + user + '", "type" : "set_user_id"}');
     }
 
       var beaches = [];

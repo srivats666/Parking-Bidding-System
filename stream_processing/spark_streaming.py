@@ -25,7 +25,7 @@ if __name__ == "__main__":
         #exit(-1)
 
     sc = SparkContext(appName="ParkingStreamingCompute")
-    ssc = StreamingContext(sc, 20)  # 10-sec window 
+    ssc = StreamingContext(sc, 30)  # 30-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
     zkQuorum = "localhost::2181"
@@ -124,6 +124,7 @@ if __name__ == "__main__":
 	 
 	 try:
 	 	redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+		#redis_pub = redis_client.pubsub()
 		ew = ElasticProcessor()
  	        doc_list = []
          
@@ -139,6 +140,8 @@ if __name__ == "__main__":
 			if redis_client.get(id) == "none":
 				redis_client.set(id, k[0])
 				occ -= 1
+				res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[0]) + '"}'
+		                redis_client.publish("bid_results", res)
 				
 		     doc_list.append({"p_id": k[0], "occ": occ})
 		
