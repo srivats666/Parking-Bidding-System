@@ -6,8 +6,9 @@ class ElasticProcessor():
         self.index = index
         self.type = type
 	self.filter_path=['hits.hits.*']
+	es_dns = os.environ['ES_DNS']
         self.es = Elasticsearch(
-            [{'host':os.environ['ES_DNS']}] 
+            [{'host':es_dns}] 
         )
 
     def delete_index(self):
@@ -103,6 +104,7 @@ class ElasticProcessor():
 
 if __name__ == "__main__":
     ew = ElasticProcessor()
+    print os.environ['ES_DNS']
     #ew.create_parking_index()
 
     doc0 = {
@@ -145,7 +147,7 @@ if __name__ == "__main__":
     dist_query2 = {"lat":  42.68569,"lon": -110.140677}
     dist_query3 = {"lat":  37.78352702274404, "lon": -122.44734831201174}
 
-    print ew.search_document_multi([dist_query1, dist_query2, dist_query3])
+    #print ew.search_document_multi([dist_query1, dist_query2, dist_query3])
     #print ew.update_document_multi([doc0, doc2, doc3])
     #print ew.create_document_multi([doc0, doc2])
     #print ew.get_mapping()
