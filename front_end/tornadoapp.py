@@ -6,13 +6,13 @@ from tornado.web import FallbackHandler, RequestHandler, Application
 from app import app
 from tornado import autoreload, websocket, web
 import json, uuid, tornado, redis
-import threading, time
+import threading, time, os
 
 global external_storage
 external_storage = {}
 
 def callback():
-    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, password='srivats')
+    redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
     global redis_pub
     redis_pub = redis_client.pubsub()
     redis_pub.subscribe("bid_results")
