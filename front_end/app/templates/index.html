@@ -50,7 +50,7 @@ input[type=text]{
     var ws;
  
     function onLoad() {
-        ws = new WebSocket("ws://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/websocket");
+        ws = new WebSocket("ws://ec2-54-68-192-60.us-west-2.compute.amazonaws.com/websocket");
         //alert("inside"); 
         ws.onmessage  = function(e) {
            console.log(e.data);
@@ -95,7 +95,7 @@ function makeQuery()
 {
      $.ajax({
         type: 'GET',
-        url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/list/'+lat+'/'+lng,
+        url: 'http://ec2-54-68-192-60.us-west-2.compute.amazonaws.com/api/list/'+lat+'/'+lng,
         data: { get_param: 'value' },
         success: function (data) {
             //alert(data["responses"][0]);
