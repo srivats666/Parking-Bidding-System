@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch, helpers as eshelpers
-import pdb, json
+import pdb, json, os
 
 class ElasticProcessor():
     def __init__(self, index="parkingdata", type="point"):
@@ -7,7 +7,7 @@ class ElasticProcessor():
         self.type = type
 	self.filter_path=['hits.hits.*']
         self.es = Elasticsearch(
-            [{'host':'172.31.1.204'}] 
+            [{'host':os.environ['ES_DNS']}] 
         )
 
     def delete_index(self):

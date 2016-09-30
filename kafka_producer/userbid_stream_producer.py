@@ -1,6 +1,6 @@
 import json
 import threading, logging, time, requests, json
-import random
+import random, os
 from kafka import KafkaProducer
 
 class Parking(object):
@@ -31,7 +31,7 @@ class Producer(threading.Thread):
     daemon = True
 
     def run(self):
-	producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+	producer = KafkaProducer(bootstrap_servers=os.environ['KAFKA_BROKERS'], value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 	count = 0
         while True:
             rd = random.randint(0, len(simplelist) -1)

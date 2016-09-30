@@ -5,7 +5,7 @@ from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from pyspark.sql import SQLContext, Row
 from elastic_search_wrapper.es_processor import ElasticProcessor
-import json
+import json, os
 from kafka import KafkaProducer
 from collections import defaultdict
 import datetime
@@ -28,10 +28,10 @@ if __name__ == "__main__":
     ssc = StreamingContext(sc, 10)  # 30-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
-    zkQuorum = "localhost::2181"
-    topic = "parking_stream_topic"
-    topic2 = "userbid_stream_topic"
-    kafkaBrokers = {"metadata.broker.list": "ec2-52-43-77-237.us-west-2.compute.amazonaws.com:9092, ec2-52-33-204-92.us-west-2.compute.amazonaws.com:9092, ec2-52-32-46-207.us-west-2.compute.amazonaws.com:9092, ec2-54-68-155-188.us-west-2.compute.amazonaws.com:9092"}
+    zkQuorum = os.environ['ZOOKEEPER_DNS']
+    topic = os.environ['KAFKA_PARKING_TOPIC']
+    topic2 = os.environ['KAFKA_BID_TOPIC']
+    kafkaBrokers = {"metadata.broker.list": os.environ['KAFKA_BROKERS']}
     park_data = KafkaUtils.createDirectStream(ssc, [topic], kafkaBrokers)
     bid_data = KafkaUtils.createDirectStream(ssc, [topic2], kafkaBrokers)
     
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 	
     # flushing redis before every window	
     def flush_redis(rdd):
-	redis_client = redis.StrictRedis(host='172.31.1.204', port=6379, db=0, password='srivats')
+	redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
     	redis_client.flushdb()    
     
     bidRdd.foreachRDD(lambda x: x.foreachPartition(flush_redis))
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 	
         try:
 
-	   redis_client = redis.StrictRedis(host='172.31.1.204', port=6379, db=0, password='srivats')
+	   redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
 	   ew = ElasticProcessor()
            usr_list = []
 	   user_id = []
@@ -123,7 +123,7 @@ if __name__ == "__main__":
 	 print "inside assign lots"
 	 
 	 try:
-	 	redis_client = redis.StrictRedis(host='172.31.1.204', port=6379, db=0, password='srivats')
+	 	redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
 		#redis_pub = redis_client.pubsub()
 		ew = ElasticProcessor()
  	        doc_list = []
