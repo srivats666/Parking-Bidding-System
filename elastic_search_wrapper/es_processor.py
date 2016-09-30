@@ -105,7 +105,7 @@ class ElasticProcessor():
 if __name__ == "__main__":
     ew = ElasticProcessor()
     print os.environ['ES_DNS']
-    #ew.create_parking_index()
+    ew.create_parking_index()
 
     doc0 = {
         "location":

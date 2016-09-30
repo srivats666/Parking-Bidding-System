@@ -1,4 +1,5 @@
 #!/bin/bash
+
 export PUBLIC_DNS="ec2-54-68-192-60.us-west-2.compute.amazonaws.com"
 export KAFKA_BID_TOPIC="userbid_stream_topic"
 export KAFKA_PARKING_TOPIC="parking_stream_topic"
