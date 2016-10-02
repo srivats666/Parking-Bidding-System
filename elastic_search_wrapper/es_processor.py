@@ -6,9 +6,9 @@ class ElasticProcessor():
         self.index = index
         self.type = type
 	self.filter_path=['hits.hits.*']
-	es_dns = os.environ['ES_DNS']
+	#es_dns = os.environ['ES_DNS']
         self.es = Elasticsearch(
-            [{'host':es_dns}] 
+            [{'host':"ec2-54-148-46-219.us-west-2.compute.amazonaws.com"}] 
         )
 
     def delete_index(self):
@@ -104,8 +104,8 @@ class ElasticProcessor():
 
 if __name__ == "__main__":
     ew = ElasticProcessor()
-    print os.environ['ES_DNS']
-    ew.create_parking_index()
+    #print os.environ['ES_DNS']
+    #ew.create_parking_index()
 
     doc0 = {
         "location":

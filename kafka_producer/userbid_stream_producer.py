@@ -44,7 +44,7 @@ class Producer(threading.Thread):
             print bid_data
    	    count += 1
 
-	    if count == 500:
+	    if count == 10000:
             	time.sleep(1)
 		count = 0
 
