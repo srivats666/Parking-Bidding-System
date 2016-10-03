@@ -57,7 +57,26 @@ input[type=text]{
            if(e.data == "hello")
 	   	sendMsg();
 	   else
-		alert("You have been assigned a spot at " + e.data);
+	   {
+		//alert("You have been assigned a spot at " + e.data);
+		for(var i=0; i<markers.length; i++)
+		{
+			if(markers[i].title == e.data)
+			{
+				markers[i].setAnimation(google.maps.Animation.BOUNCE);
+				var content = "<h3>You have been assigned a spot at " + markers[i].title + "</h3>";
+
+			        var infowindow = new google.maps.InfoWindow({
+			            content: content,
+				    zIndex: -6
+        			});
+
+                		infowindow.open(map, markers[i]);		
+				break;
+			}
+
+		}
+	   }
 
         };
     }
@@ -95,7 +114,7 @@ function makeQuery()
 {
      $.ajax({
         type: 'GET',
-        url: 'http://ec2-54-68-192-60.us-west-2.compute.amazonaws.com/api/list/'+lat+'/'+lng,
+        url: 'http://smartpark.pw/api/list/'+lat+'/'+lng,
         data: { get_param: 'value' },
         success: function (data) {
             //alert(data["responses"][0]);
@@ -219,7 +238,7 @@ function bid()
     var amt =  $('#amt').val();;
     $.ajax({
         type: 'GET',
-        url: 'http://ec2-52-43-77-237.us-west-2.compute.amazonaws.com/api/bid/'+amt+'/'+lat+'/'+lng+'/'+user,
+        url: 'http://smartpark.pw/api/bid/'+amt+'/'+lat+'/'+lng+'/'+user,
         data: { get_param: 'value' },
         success: function (data) {
             alert("Bid successfully");
