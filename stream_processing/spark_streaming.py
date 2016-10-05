@@ -25,13 +25,13 @@ if __name__ == "__main__":
         #exit(-1)
 
     sc = SparkContext(appName="ParkingStreamingCompute")
-    ssc = StreamingContext(sc, 10)  # 30-sec window 
+    ssc = StreamingContext(sc, 10)  # 10-sec window 
 
     #zkQuorum, topic = sys.argv[1:]
-    zkQuorum = os.environ['ZOOKEEPER_DNS']
-    topic = os.environ['KAFKA_PARKING_TOPIC']
-    topic2 = os.environ['KAFKA_BID_TOPIC']
-    kafkaBrokers = {"metadata.broker.list": os.environ['KAFKA_BROKERS']}
+    zkQuorum = 'ec2-54-68-192-60.us-west-2.compute.amazonaws.com:2181'#os.environ['ZOOKEEPER_DNS']
+    topic = 'parking_stream_topic'#os.environ['KAFKA_PARKING_TOPIC']
+    topic2 = 'userbid_stream_topic'#os.environ['KAFKA_BID_TOPIC']
+    kafkaBrokers = {"metadata.broker.list": "ec2-54-68-192-60.us-west-2.compute.amazonaws.com:9092, ec2-52-36-116-225.us-west-2.compute.amazonaws.com:9092, ec2-52-33-125-42.us-west-2.compute.amazonaws.com:9092"}
     park_data = KafkaUtils.createDirectStream(ssc, [topic], kafkaBrokers)
     bid_data = KafkaUtils.createDirectStream(ssc, [topic2], kafkaBrokers)
     
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 	
     # flushing redis before every window	
     def flush_redis(rdd):
-	redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
+	redis_client = redis.StrictRedis(host='ec2-52-36-186-92.us-west-2.compute.amazonaws.com', port=6379, db=0, password='srivats')
     	redis_client.flushdb()    
     
     bidRdd.foreachRDD(lambda x: x.foreachPartition(flush_redis))
@@ -74,7 +74,6 @@ if __name__ == "__main__":
 	
         try:
 
-	   redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
 	   ew = ElasticProcessor()
            usr_list = []
 	   user_id = []
@@ -82,7 +81,6 @@ if __name__ == "__main__":
            for kv in rdd:
 		user_id.append((kv["uid"], kv["amt"]))
 		usr_list.append({"lat":  kv["lat"],"lon": kv["long"]})
-		#redis_client.set(kv["uid"], "none")
 
 	   if(len(usr_list) > 0):
 	        res = ew.search_document_multi(usr_list)
@@ -111,7 +109,7 @@ if __name__ == "__main__":
 	   # sorting the users by bid amount for each parking lot
 	   #for k,v in results.items():
 		#v.sort(key=lambda x: -x[1])
-	    
+	   	   	    
 	   return results.items()
 	
 	except Exception as e:
@@ -123,8 +121,9 @@ if __name__ == "__main__":
 	 print "inside assign lots"
 	 
 	 try:
-	 	redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
-		#redis_pub = redis_client.pubsub()
+	 	#redis_client = redis.StrictRedis(host=os.environ['REDIS_HOST'], port=6379, db=0, password=os.environ['REDIS_PASSWORD'])
+		redis_client = redis.StrictRedis(host='ec2-52-36-186-92.us-west-2.compute.amazonaws.com', port=6379, db=0, password='srivats')
+		redis_pub = redis_client.pubsub()
 		ew = ElasticProcessor()
  	        doc_list = []
          
@@ -134,24 +133,21 @@ if __name__ == "__main__":
 		     for users in v:
 			
 			id = users[0]
+			initial_occ = occ
 			if occ == 0:
 			    break
 			
 			if redis_client.get(id) is None:
 				redis_client.set(id, k[0])
 				occ -= 1
-				#res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[4]) + '"}'
-		                #redis_client.publish("bid_results", res)
-				
-		     doc_list.append({"p_id": k[0], "occ": occ})
+				res = '{"user_id":"' + str(id) + '", "p_id":"' + str(k[4]) + '"}'
+		                redis_client.publish("bid_results", res)
+		     
+		     if occ != initial_occ:
+		     	doc_list.append({"p_id": k[0], "occ": occ})
 		
 		if(len(doc_list) > 0):
                 	print ew.update_document_multi(doc_list)
-			
-		#keys = redis_client.keys('*')
-		#for key in keys:
-        	    #val = redis_client.get(key)
-		    #print key, val
 
 	 except Exception as e:
 	   print Exception(e)
