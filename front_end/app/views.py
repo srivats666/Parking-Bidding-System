@@ -10,8 +10,14 @@ import tornado.httpserver
 producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 @app.route('/<user>')
-@app.route('/index/<user>')
-def index(user):
+def index1(user):
+  if user is None:
+        user = "Adam"
+  return render_template("index.html", title = 'Home', user = user)
+
+@app.route('/')
+def index():
+  user = "Adam"
   return render_template("index.html", title = 'Home', user = user)
 
 @app.route('/api/list/<lat>/<long>')
