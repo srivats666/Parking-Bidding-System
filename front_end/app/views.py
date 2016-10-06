@@ -4,7 +4,7 @@ from flask import jsonify
 from elastic_search_wrapper.es_processor import ElasticProcessor
 import json
 from kafka import KafkaProducer
-import tornado.web
+import tornado.web, random
 import tornado.httpserver
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
@@ -17,7 +17,8 @@ def index1(user):
 
 @app.route('/')
 def index():
-  user = "Adam"
+  user_id = random.randint(1, 200000)
+  user = "Adam_" + str(user_id)
   return render_template("index.html", title = 'Home', user = user)
 
 @app.route('/api/list/<lat>/<long>')
