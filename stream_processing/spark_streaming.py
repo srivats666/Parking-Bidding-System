@@ -107,8 +107,8 @@ if __name__ == "__main__":
                 		print Exception(response)
 	   
 	   # sorting the users by bid amount for each parking lot
-	   #for k,v in results.items():
-		#v.sort(key=lambda x: -x[1])
+	   for k,v in results.items():
+		v.sort(key=lambda x: -x[1])
 	   	   	    
 	   return results.items()
 	
