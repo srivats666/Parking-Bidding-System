@@ -30,7 +30,7 @@ As of October, 2016, this system costs ~$26 a day with AWS on-demand instances u
 
 The image below depicts the underlying data pipeline.
 
-![Alt text](app/static/img/pipeline.png?raw=true "Pipeline")
+![Alt text](/pipeline.png?raw=true "Pipeline")
 
 ### Data source
 The data streams are synthesized and replayed based on the sample json response from sfpark.org
