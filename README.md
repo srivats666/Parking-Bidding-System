@@ -40,7 +40,7 @@ The parking stream sends the parking id and its updated availability. The userbi
 ### Spark Streaming
 Spark Streaming receives a 10 sec parking and userbid stream window. Spark bulk updates ElasticSearch with their latest availabilities. Then does a bulk search query to get list of available parking spots around the users. Assigns the user to a parking spot based on his bid amount.
 
-### Data bases
+### Databases
 ElasticSearch is used to store the parking lot information and its availabilities. Its geospatial capabilities are used to find spots based on user's lat, long. Redis is used to maintain the assignment state and also to publish the assignment results back to the user using web sockets.
 
 
